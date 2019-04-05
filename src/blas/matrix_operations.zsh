@@ -41,3 +41,25 @@ function matrix_transpose()
         done
     done
 }
+
+
+#   Usage
+#
+# print STDIN matrix muliplied by a scalar
+# matrix_mul <scalar>
+function matrix_mul_scalar()
+{
+    matrix_load w1 h1 a1
+
+    local scalar
+    typeset -F scalar
+    scalar=$1
+
+    size=$((w1 * h1))
+    echo $w1 $h1
+
+    for ((i = 1; i <= size; i++));
+    do
+        echo $((a1[i] * scalar))
+    done
+}
