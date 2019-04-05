@@ -87,3 +87,39 @@ function matrix_mul_p2p()
         echo $((a1[i] * a2[i]))
     done
 }
+
+#  Usage
+#
+# multiplication of matrix A (fd: 3) and B (fd: 4)
+# print on stdout
+function matrix_mul()
+{
+    matrix_load w1 h1 a1 <&3
+    matrix_load w2 h2 a2 <&4
+
+    if (( w1 != h2 ));
+    then
+        echo "matrix_mul: matrix A width <> matrix B height"
+        return 1
+    fi
+
+    local sum
+    float sum
+
+    echo $w2 $h1
+
+    for ((i = 0; i < h1; i++));
+    do
+        for ((j = 0; j < w2; j++));
+        do
+            sum=0.
+
+            for ((k = 0; k < w1; k++));
+            do
+                ((sum += a1[k + i * w1 + 1] * a2[j + k * w2 + 1]))
+            done
+
+            echo "$sum"
+        done
+    done
+}
