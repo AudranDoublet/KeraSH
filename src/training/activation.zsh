@@ -1,8 +1,19 @@
 #!/bin/zsh
 
-ACTIVATION_FUNCS="identity binarystep sigmoid tanh arctan arcsinh elliotsig \
-isru isrlu relu prelu elu selu srelu softplus bentidentity sinusoid sinc \
-gaussian softmax"
+typeset -U ACTIVATION_FUNCS
+
+ACTIVATION_FUNCS=(identity binarystep sigmoid tanh arctan arcsinh elliotsig isru isrlu relu prelu elu selu srelu softplus bentidentity sinusoid sinc gaussian softmax)
+
+function activation_exists()
+{
+    v=$1
+    w=${ACTIVATION_FUNCS[(r)$v]}
+
+    [ "$v" = "$w" ]
+    return $?
+}
+
+# maxtrix_map activ_$func 0.3 "0.2 1.4" < $MAT/coucou.dat
 
 function activ_identity()
 {
