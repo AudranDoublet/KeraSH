@@ -54,3 +54,21 @@ function matrix_create()
 
     echo "$1 $2" # nb_lines, nb_col
 }
+
+#   Usage
+# print a new matrix initialized with random values in stdout
+#
+# matrix_random <width> <height>
+function matrix_random()
+{
+    if ! matrix_create "$1" "$2"; then
+        return 1
+    fi
+
+    size=$(($1*$2))
+
+    for ((i = 0; i < size; i++));
+    do
+        echo $(( rand48() ))
+    done
+}
