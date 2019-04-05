@@ -25,12 +25,13 @@ store_model()
 {
     local name=$1
     local model_file=$2
-    local data_file=$3
+    local data_x=$3
+    local data_y=$4
 
     local model_path="${MODEL}/${name}"
     mkdir -p "${model_path}"
-    cp "${model_file}" "${model_path}"
+    cp "${model_file}" "${model_path}/${name}.model"
 
     source ./util/data.sh
-    generate_data "${data_file}" "${name}"
+    generate_data "${data_x}" "${data_y}" "${name}"
 }
