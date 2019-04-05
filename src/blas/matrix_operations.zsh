@@ -25,7 +25,7 @@ function matrix_add()
 
 #   Usage
 #
-# print sum of FD:3 and FD:4 matrix in stdout
+# print substraction of FD:3 and FD:4 matrix in stdout
 function matrix_sub()
 {
     matrix_load w1 h1 a1 <&3
