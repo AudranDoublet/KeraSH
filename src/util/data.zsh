@@ -1,66 +1,57 @@
 zmodload zsh/mathfunc
+source ./blas/import.zsh
 
-generate_data()
+function vectorize()
 {
-    local file_x=$1
-    local file_y=$2
-    local model=$3
+    local train_path=$1
+    local val_path=$2
 
-    local x_train_path="${MODEL}/${model}/x_train.dat"
-    local x_val_path="${MODEL}/${model}/x_val.dat"
-    local y_train_path="${MODEL}/${model}/y_train.dat"
-    local y_val_path="${MODEL}/${model}/y_val.dat"
+    local file=$3
 
-    local sample_size=$(wc -l ${file_x} | cut -d ' ' -f 1)
-    local train_samples=$(( int(rint(sample_size * 0.8)) ))
+    local train_samples=$4
     local sample_id=0
 
     setopt shwordsplit
 
-    while read line;
+    while read sample;
     do
         IFS=,
-        v=($line)
+        v=("${sample}")
+        v_length="${#v[@]}"
         if (( ${sample_id} < ${train_samples} ))
         then
-            for x in $v;
-            do
-                printf "$x " >> "${x_train_path}"
-            done
-            printf "\n" >> "${x_train_path}"
+            matrix_create_direct $v_length 1 $v \
+                > "${train_path}/sample_${sample_id}.dat"
         else
-            for x in $v;
-            do
-                printf "$x " >> "${x_val_path}"
-            done
-            printf "\n" >> "${x_val_path}"
+            matrix_create_direct $v_length 1 $v \
+                > "${val_path}/sample_${sample_id}.dat"
         fi
 
         sample_id=$(( sample_id + 1 ))
 
-    done < $file_x
+    done < "${file}"
 
-    sample_id=0
-    while read line;
-    do
-        IFS=,
-        v=($line)
-        if (( ${sample_id} < ${train_samples} ))
-        then
-            for y in $v;
-            do
-                printf "$y " >> "${y_train_path}"
-            done
-            print "\n" >> "${y_train_path}"
-        else
-            for y in $v;
-            do
-                printf "$y " >> "${y_val_path}"
-            done
-            printf "\n" >> ${y_val_path}
-        fi
+}
 
-        sample_id=$(( sample_id + 1 ))
+function generate_data()
+{
+    local file_x="${1}"
+    local file_y="${2}"
+    local model="${3}"
 
-    done < $file_y
+    local x_train_path="${MODEL}/${model}/x_train"
+    local x_val_path="${MODEL}/${model}/x_val/"
+    local y_train_path="${MODEL}/${model}/y_train/"
+    local y_val_path="${MODEL}/${model}/y_val/"
+
+    local sample_size=$(wc -l ${file_x} | cut -d ' ' -f 1)
+    local train_samples=$(( int(rint(sample_size * 0.8)) ))
+
+    mkdir -p "${x_train_path}"
+    mkdir -p "${x_val_path}"
+    mkdir -p "${y_train_path}"
+    mkdir -p "${y_val_path}"
+
+    vectorize "${x_train_path}" "${x_val_path}" "${file_x}" "${train_samples}"
+    vectorize "${y_train_path}" "${y_val_path}" "${file_y}" "${train_samples}"
 }
