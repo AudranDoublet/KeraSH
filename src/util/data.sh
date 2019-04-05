@@ -9,7 +9,7 @@ generate_data()
 
     while read x y
     do
-        if [[ "${sample_id}" -lt "${train_samples}" ]]
+        if (( "${sample_id}" < "${train_samples}" ))
         then
             x >> "${MODEL}/${model}/x_train.dat"
             y >> "${MODEL}/${model}/y_train.dat"
