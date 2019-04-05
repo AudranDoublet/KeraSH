@@ -39,3 +39,18 @@ function matrix_load()
         return 1
     fi
 }
+
+#   Usage
+# print a new matrix in stdout
+#
+# matrix_create <width> <height>
+function matrix_create()
+{
+    if (($# != 2));
+    then
+        echo "matrix_create: bad usage" >&2
+        return 1
+    fi
+
+    echo "$1 $2" # nb_lines, nb_col
+}
