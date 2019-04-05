@@ -37,7 +37,7 @@ function matrix_transpose()
     do
         for ((y = 0; y < h1; y++));
         do
-            echo ${a1[x + y * size + 1]}
+            echo ${a1[x + y * w1 + 1]}
         done
     done
 }
