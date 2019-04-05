@@ -72,3 +72,31 @@ function matrix_random()
         echo $(( rand48() ))
     done
 }
+
+#   Usage
+# print a new matrix initialized with a specified value
+#
+# matrix_create_fill <width> <height> <value:float (1)>
+function matrix_create_fill()
+{
+    if ! matrix_create "$1" "$2"; then
+        return 1
+    fi
+
+    local val
+    typeset -F val
+
+    if (($# != 3));
+    then
+        val=1.0
+    else
+        val="$3"
+    fi
+
+    size=$(($1*$2))
+
+    for ((i = 0; i < size; i++));
+    do
+        echo "$val"
+    done
+}
