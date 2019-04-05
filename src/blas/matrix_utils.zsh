@@ -20,3 +20,22 @@ function matrix_print()
         printf "\n"
     done
 }
+
+#   Usage
+# load a matrix from stdin
+#
+# matrix_load <width:var (width)> <height:var (height)> <array:var (array)>
+function matrix_load()
+{
+    if (($# == 0));
+    then
+        read width height
+        array=($(<&0))
+    elif (($# == 3))
+    then
+        read "$1" "$2"
+        eval "$3=($(<&0))"
+    else
+        return 1
+    fi
+}
