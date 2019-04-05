@@ -10,7 +10,7 @@ function run_test()
     then
         printf "%-60s \e[033mOK\e[0m\n" "$1"
     else
-        printf "%-60s \e[091mKO\e[0m\n" "$1"
+        printf "%-60s \e[091mKO (error code $?)\e[0m\n"
     fi
 
     cd ../tests
