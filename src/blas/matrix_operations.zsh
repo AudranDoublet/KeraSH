@@ -42,7 +42,6 @@ function matrix_transpose()
     done
 }
 
-
 #   Usage
 #
 # print STDIN matrix muliplied by a scalar
@@ -121,5 +120,22 @@ function matrix_mul()
 
             echo "$sum"
         done
+    done
+}
+
+#   Usage
+#
+# apply function to all elements of matrix A (stdin)
+# print on stdout
+function matrix_apply()
+{
+    matrix_load w1 h1 a1
+
+    size=$((w1 * h1))
+    echo $w1 $h1
+
+    for ((i = 1; i <= size; i++));
+    do
+        $1 ${a1[i]}
     done
 }
