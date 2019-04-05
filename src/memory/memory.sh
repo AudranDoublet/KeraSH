@@ -29,7 +29,7 @@ store_model()
 
     local model_path="${MODEL}/${name}"
     mkdir -p "${model_path}"
-    cp model_file "${model_path}"
+    cp "${model_file}" "${model_path}"
 
     source ./util/data.sh
     generate_data "${data_file}" "${name}"
