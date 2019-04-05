@@ -20,3 +20,17 @@ free_matrix()
 {
     rm -f "${MAT}/${1}.mat"
 }
+
+store_model()
+{
+    local name=$1
+    local model_file=$2
+    local data_file=$3
+
+    local model_path="${MODEL}/${name}"
+    mkdir -p "${model_path}"
+    cp model_file "${model_path}"
+
+    source ./util/data.sh
+    generate_data "${data_file}" "${name}"
+}
