@@ -111,6 +111,23 @@ function matrix_mul_p2p()
 
 #  Usage
 #
+# point-to-point multiplication of matrix A (fd: stdin) with itself
+# print on stdout
+function matrix_mul_self_p2p()
+{
+    matrix_load w1 h1 a1
+
+    size=$((w1 * h1))
+    echo $w1 $h1
+
+    for ((i = 1; i <= size; i++));
+    do
+        echo $((a1[i] * a1[i]))
+    done
+}
+
+#  Usage
+#
 # multiplication of matrix A (fd: 3) and B (fd: 4)
 # print on stdout
 function matrix_mul()
