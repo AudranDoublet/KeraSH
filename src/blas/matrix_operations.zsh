@@ -25,6 +25,35 @@ function matrix_add()
 
 #   Usage
 #
+# print sum of FD:3 and FD:4 matrix in stdout
+function matrix_add_inplace()
+{
+    if ! matrix_load w1 h1 a1 < "$1";
+    then
+        cp "$2" "$3"
+        return 0
+    fi
+
+    if (( w1 != w2 || h1 != h2 ));
+    then
+        echo "matrix_add: matrices have different size" >&2
+        return 1
+    fi
+
+    size=$((w1 * h1))
+
+    {
+        echo $w1 $h1
+
+        for ((i = 1; i <= size; i++));
+        do
+            echo $((a1[i] + a2[i]))
+        done
+    } > "$3"
+}
+
+#   Usage
+#
 # print substraction of FD:3 and FD:4 matrix in stdout
 function matrix_sub()
 {
