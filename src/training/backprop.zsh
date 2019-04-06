@@ -30,3 +30,33 @@ function fit_dense()
     # Gradient sum
     matrix_add_inplace $gradients $(tmp_file 2) $gradients
 }
+
+function fit_output()
+{
+    local cost="$2"
+    local layerid="$3"
+
+    local gradients="$(predict_name $layerid gradients)"
+
+    cost_"$cost" $output_file $label_file $batch_size > $(predict_name $layerid delta)
+    matrix_add_inplace $gradients $(predict_name $layerid delta) $gradients
+}
+
+#   Usage
+#
+# fit_sample <x_vec> <x_label>
+function fit_sample()
+{
+    predict "$1"
+
+    output_file="$(predict_name 0 output)"
+    label_file=$2
+
+
+    for ((i = nb_layer - 1; i >= 0; i--));
+    do
+        read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
+
+        fit_"$layer_type" "$genome_dir/topology/layer_$i" "$activation" "$i"
+    done
+}
