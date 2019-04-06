@@ -41,7 +41,6 @@ function matrix_add_inplace()
     if (( w1 != w2 || h1 != h2 ));
     then
         echo "matrix_add_inplace: matrices have different size" >&2
-        exit 1
         return 1
     fi
 

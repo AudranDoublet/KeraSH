@@ -125,34 +125,27 @@ function fit_batch()
     # Sum all gradients from all process for each layer
     for pid in $pids;
     do
-        for (( i = 0; i < nb_layers; i++ ));
+        for (( i = 1; i < nb_layer; i++ ));
         do
-            matrix_add_inplace "$(predict_name $i gradients)" "${MAT}/$pid/${i}_gradients.dat"
+            matrix_add_inplace "$(predict_name $i gradients)" \
+                "${MAT}/$pid/${i}_gradients.dat" "$(predict_name $i gradients)"
         done
     done
 
     # Apply learning rate/gradient on each layer
-    for (( i = 0; i < nb_layers; i++ ));
+    for (( i = 1; i < nb_layer; i++ ));
     do
-        matrix_mul_scalar $((1.0 * learning_rate / batch_size)) \
+        matrix_mul_scalar $((- 1.0 * learning_rate / batch_size)) \
                 < "$(predict_name $i gradients)" > "$(tmp_name 0)"
 
         matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_name 0)"
     done
+
+    matrix_print < "$(tmp_name 0)"
 }
 
-function fit()
+function fit_epoch()
 {
-    export gen_id=$1
-    export batch_size=$2
-    export nb_proc=$3
-    export learning_rate=$4
-    export genome_dir="${MODEL}/genomes/gen_$1"
-
-    # Get model's layer count
-    matrix_load _ _ metadata < "${genome_dir}/meta.dat"
-    nb_layer=${metadata[3]}
-
     # Get features vector in a random order
     cd ${MODEL}/x_train
     local features=($(echo "$(ls)" | shuf)) 
@@ -169,5 +162,26 @@ function fit()
 
         local start=$((nb - batch_size))
         fit_batch ${features:$start:$nb}
+    done
+}
+
+function fit()
+{
+    export epoch_count=$1
+    export epoch_num=0
+    export gen_id=$2
+    export batch_size=$3
+    export nb_proc=$4
+    export learning_rate=$5
+    export genome_dir="${MODEL}/genomes/gen_$gen_id"
+
+    # Get model's layer count
+    matrix_load _ _ metadata < "${genome_dir}/meta.dat"
+    nb_layer=${metadata[3]}
+
+    local i
+    for (( i = 0; i < epoch_count; i++ ));
+    do
+        fit_epoch
     done
 }

@@ -8,6 +8,7 @@ init_fs()
     sudo mount -t tmpfs -o size="${1}m" tmpfs "${MOUNTPOINT}"
     mkdir -p "${MAT}"
     mkdir -p "${MODEL}"
+    mkdir -p "${MAT}/$$/tmp"
 }
 
 end_fs()
