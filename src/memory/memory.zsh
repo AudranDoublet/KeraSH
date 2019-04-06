@@ -28,10 +28,8 @@ store_model()
     local data_x=$3
     local data_y=$4
 
-    local model_path="${MODEL}/${name}"
-    mkdir -p "${model_path}"
-    cp "${model_file}" "${model_path}/${name}.model"
+    mkdir -p "${MODEL}/"
+    cp "${model_file}" "${MODEL}/${name}.model"
 
-    source ./util/data.zsh
     generate_data "${data_x}" "${data_y}" "${name}"
 }
