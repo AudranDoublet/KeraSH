@@ -1,0 +1,4 @@
+input 2 -
+dense 3 sigmoid
+dense 1 sigmoid
+output 1 mse

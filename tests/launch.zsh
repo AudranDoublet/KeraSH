@@ -22,11 +22,19 @@ function run_test()
 
 cd tests
 
-for v in $(find -mindepth 2 -type f -name '*.zsh' | sort);
-do
-    run_test $v
-done
+if (( $# == 1 ));
+then
+    for v in "$@";
+    do
+        run_test $v
+    done
+else
+    for v in $(find -mindepth 2 -type f -name '*.zsh' | sort);
+    do
+        run_test $v
+    done
+fi
 
 cd ..
 
-rm -rf ./src/kerash_mountpoint
+#rm -rf ./src/kerash_mountpoint
