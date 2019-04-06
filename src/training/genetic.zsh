@@ -57,3 +57,23 @@ function genetic_mk_gen()
 
     $delete_old_gen
 }
+
+#   Usage
+#
+# Process multiple generation
+#
+# genetic_mk_gens <count> <parents...>
+function genetic_mk_gens()
+{
+    local total=$1
+    shift 1
+
+    overall_best=0.0
+    generation=("$@")
+    generation_size="$#"
+
+    for ((i = 1; i <= $1; i++));
+    do
+        process_generation "$i" "$1"
+    done
+}
