@@ -1,6 +1,6 @@
 MOUNTPOINT="./kerash_mountpoint"
 MAT="./kerash_mountpoint/mat"
-MODEL="./kerash_mountpoint/models/"
+MODEL="./kerash_mountpoint/model/"
 
 init_fs()
 {
