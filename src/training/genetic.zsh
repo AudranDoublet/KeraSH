@@ -1,11 +1,10 @@
 #!/bin/zsh
 
 # current generation vars
-#
+
 generation=() # should be only names
 generation_size=0
 overall_best=0.0
-
 
 # genetic configuration
 
@@ -13,7 +12,6 @@ parent_count=0 # parent count for each generation
 evaluate_parent="" # evaluate parent function
 create_child="" # create child function
 delete_old_gen="" # delete old generation and put new one function
-
 
 #   Usage
 #
