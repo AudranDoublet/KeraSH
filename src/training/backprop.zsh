@@ -65,57 +65,45 @@ function fit_batch_part()
 {
     gen_id=$1
     batch_size=$2
-    first_feature=$3
-    last_feature=$4
 
-    for (( i = first_feature; i < last_feature; i++ ))
+    shift 2
+
+    for v in "$@";
     do
-        fit_sample "${MODEL}/x_train/sample_$i.dat" "${MODEL}/y_train/sample_$i.dat"
+        fit_sample "${MODEL}/x_train/$v" "${MODEL}/y_train/$v"
     done
 }
 
 #   Usage
 #
 # Backpropagation for a batch
-# Parameters:
-#   genome id
-#   batch size
-#   number of processor
-#   first feature
-#   last feature
-#   learniong rate
 function fit_batch()
 {
-    local gen_id=$1
-    local batch_size=$2
-    local nb_proc=$3
-    local first_feature=$4
-    local last_feature=$((first_feature + batch_size))
-    local learning_rate=$5
-
-    local genome_dir="${MODEL}/genomes/gen_${$1}"
-
-    # Get model's layer count
-    matrix_load _ _ metadata < "${genome_dir}/meta.dat"
-    local nb_layer=${metadata[3]}
-
     # Fork nb_proc times in order to train a part of the batch
     pids=()
 
     for (( i = 0; i < nb_proc; i++ ));
     do
+        echo $((i + 1)) $batch_size $nb_proc
         beg=$((i * batch_size / nb_proc))
-        en=$(((i + 1) * batch_size / nb_proc - 1))
+        en=$(((i + 1.0) * batch_size / nb_proc - 1))
+        en=$((int(rint(en))))
 
-        clone $TTY 2> /dev/null >&2
-
-        if (( $! == 0 ));
-        then
-            fit_batch_part "$gen_id" "$batch_size" "$beg" "$en"
-            exit 0
+        if (( beg == en ));
+        then 
+            continue
         fi
 
-        pids[$(i + 1)]=$!
+        vec=()
+
+        for (( j = beg; j < en; j++ ));
+        do
+            vec[$((j - beg + 1))]=$1
+            shift 1
+        done
+
+        zsh ./training/_batch_part.zsh "$gen_id" "$batch_size" $vec
+        pids[$((i + 1))]="$!"
     done
 
     # Wait for all process
@@ -137,5 +125,36 @@ function fit_batch()
                 < "$(predict_name $i gradients)" > "$(tmp_file 0)"
 
         matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_file 0)"
+    done
+}
+
+function fit()
+{
+    export gen_id=$1
+    export batch_size=$2
+    export nb_proc=$3
+    export learning_rate=$4
+    export genome_dir="${MODEL}/genomes/gen_$1"
+
+    # Get model's layer count
+    matrix_load _ _ metadata < "${genome_dir}/meta.dat"
+    export nb_layer=${metadata[3]}
+
+    # Get features vector in a random order
+    cd ${MODEL}/x_train
+    local features=($(echo "$(ls)" | shuf)) 
+    cd -
+
+    for (( nb=${#features[@]}; nb > 0; nb -= batch_size ));
+    do
+        if (( nb < batch_size ));
+        then
+            batch_size=$nb
+        fi
+
+        local start=$((nb - batch_size))
+        fit_batch ${features:$start:$nb}
+
+        echo "Batch done"
     done
 }
