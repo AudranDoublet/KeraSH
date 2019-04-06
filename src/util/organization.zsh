@@ -12,6 +12,19 @@ function matrix_namer()
     echo "${genome_name}_${epoch_nb}_${layer_id}_${sample_id}_${mat_type}.dat"
 }
 
+function predict_name()
+{
+    local layer_id=$1
+    local mat_type=$2
+
+    echo "${MAT}/$$/${layer_id}_${mat_type}.dat"
+}
+
+function tmp_name()
+{
+    echo "${MAT}/$!/tmp/$1.dat"
+}
+
 function create_genome()
 {
     local genome_name="${1}"
