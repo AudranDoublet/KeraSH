@@ -15,3 +15,13 @@ function predict_dense()
 
     input_file="$(predict_name $layer activation)"
 }
+
+function predict_output()
+{
+    cp "$input_file" "$(predict_name 0 output)"
+}
+
+function predict_input()
+{
+    cp "$input_file" "$(predict_name $layer activation)"
+}
