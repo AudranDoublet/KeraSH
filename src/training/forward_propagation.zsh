@@ -25,3 +25,20 @@ function predict_input()
 {
     cp "$input_file" "$(predict_name $layer activation)"
 }
+
+function predict()
+{
+    input_file=$1
+    local genome_dir="${MODEL}/genomes/gen_$gen_id"
+
+    matrix_load _ _ metadata < "${genome_dir}/meta.dat"
+
+    nb_layer=${metadata[3]}
+
+    for ((i = 0; i < nb_layer; i++));
+    do
+        read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
+
+        predict_"$layer_type" "$genome_dir/topology/layer_$i" "$activation" "$i"
+    done
+}
