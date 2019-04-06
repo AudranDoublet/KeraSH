@@ -2,25 +2,16 @@
 
 function predict_dense()
 {
+    local dir="$1"
+    local activation="$2" 
+    local layerid="$3"
 
-    matrix_load w h input < 
-}
+    matrix_mul  3< "${input_file}" \
+                4< "${dir}/weights.dat" \
+                 > "$(predict_name $layerid activity)"
 
-function predict()
-{
-    input_file=$2
-    tmp="${MAT}/$!"
+    matrix_map activ_$activation < "$(predict_name $layerid activity)" \
+                                 > "$(predict_name $layerid activation)"
 
-    local genome_dir="${MODELS}/genomes/gen_${$1}"
-    matrix_load _ _ metadata < "${genome_dir}/meta.dat"
-
-    nb_layer=${metadata[3]}
-
-    for ((i = 0; i < nb_layer; i++));
-    do
-        read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
-
-        "$predict"_"$layer_type" "$genome_dir/topology/layer_$i" \
-                "$activation" "$input_file" "$tmp"
-    done
+    input_file="$(predict_name $layer activation)"
 }
