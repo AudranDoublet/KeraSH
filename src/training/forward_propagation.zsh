@@ -10,8 +10,8 @@ function predict_dense()
                 4< "${dir}/weights.dat" \
                  > "$(predict_name $layerid activity)"
 
-    matrix_map activ_$activation < "$(predict_name $layerid activity)" \
-                                 > "$(predict_name $layerid activation)"
+    matrix_apply activ_$activation < "$(predict_name $layerid activity)" \
+                                   > "$(predict_name $layerid activation)"
 
     input_file="$(predict_name $layer activation)"
 }
@@ -23,6 +23,7 @@ function predict_output()
 
 function predict_input()
 {
+    local layer="$3"
     cp "$input_file" "$(predict_name $layer activation)"
 }
 
