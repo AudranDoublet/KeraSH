@@ -9,7 +9,7 @@ source ./util/organization.zsh
 init_fs
 
 # Core
-store_model "test" ./test_model ./test_data ./test_label
+store_model "test" ../tests/test_model ../tests/test_data ../tests/test_label
 create_genome "test" "${MODEL}/test.model"
 
 # Backup data and end file system

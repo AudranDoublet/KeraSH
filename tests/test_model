@@ -1,0 +1,3 @@
+2 1
+fully_connected 3 sigmoid
+fully_connected 1 sigmoid
