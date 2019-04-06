@@ -13,7 +13,7 @@ function predict_dense()
     matrix_apply activ_$activation < "$(predict_name $layerid activity)" \
                                    > "$(predict_name $layerid activation)"
 
-    input_file="$(predict_name $layer activation)"
+    input_file="$(predict_name $layerid activation)"
 }
 
 function predict_output()
@@ -36,10 +36,11 @@ function predict()
 
     nb_layer=${metadata[3]}
 
-    for ((i = 0; i < nb_layer; i++));
+    local i
+
+    for ((i = 0; i < nb_layer; i++))
     do
         read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
-
         predict_"$layer_type" "$genome_dir/topology/layer_$i" "$activation" "$i"
     done
 }

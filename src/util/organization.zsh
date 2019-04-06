@@ -22,7 +22,7 @@ function predict_name()
 
 function tmp_name()
 {
-    echo "${MAT}/$!/tmp/$1.dat"
+    echo "${MAT}/$$/tmp/$1.dat"
 }
 
 function create_genome()

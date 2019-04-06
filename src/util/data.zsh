@@ -16,7 +16,7 @@ function vectorize()
     while read sample;
     do
         local IFS=,
-        v=("${sample}")
+        v=(${sample})
 
         v_length="${#v[@]}"
 
@@ -32,7 +32,6 @@ function vectorize()
         sample_id=$(( sample_id + 1 ))
 
     done < "${file}"
-
 }
 
 function generate_data()
@@ -74,6 +73,7 @@ function parse_input()
 function parse_output()
 {
     layer_activation="$1"
+    height="$width"
 }
 
 function parse_model()

@@ -2,39 +2,44 @@
 
 function fit_dense()
 {
-    local dir="$1"
-    local activation="$2"
-    local layerid="$3"
+    local activation="$1"
+    local layerid="$2"
     local nextlayer=$((layerid + 1))
     local prevlayer=$((layerid - 1))
+    local dir="${MODEL}/genomes/gen_${gen_id}/topology/layer_$nextlayer"
 
     local gradients="$(predict_name $layerid gradients)"
 
     # Tmp = (DELTAn+1 * W_t(n+1)
-    matrix_mult 3< "$(predict_name $nextlayer delta)" 4< "$dir/weights_t.dat" \
-                 > $(tmp_file 1)
+    matrix_mul 3< "$(predict_name $nextlayer delta)" 4< "$dir/weights_t.dat" \
+                 > "$(tmp_name 1)"
 
     # S'(Zn)
     matrix_apply "activ_d_$activation" < $(predict_name $layerid activity) \
-                                       > "$(tmp_file 2)"
+                                       > "$(tmp_name 2)"
 
     # DELTAn = Tmp*S'(Zn)
-    matrix_mul_p2p 3< "$(tmp_file 1)"  4< "$(tmp_file 2)" > "$(predict_name $layerid delta)"
+    matrix_mul_p2p 3< "$(tmp_name 1)"  4< "$(tmp_name 2)" > "$(predict_name $layerid delta)"
 
     # A_t(n-1)
-    matrix_transpose < "$(predict_name $prevlayer activation)" > "$(tmp_file 1)"
+    matrix_transpose < "$(predict_name $layerid activation)" > "$(tmp_name 1)"
 
     # Gradient = DELTAn * A_t(n-1)
-    matrix_mul 3< "$(predict_name $layerid delta)" 4< "$(tmp_file 1)" > "$(tmp_file 2)"
+    matrix_mul 3< "$(predict_name $layerid delta)" 4< "$(tmp_name 1)" > "$(tmp_name 2)"
 
     # Gradient sum
-    matrix_add_inplace $gradients $(tmp_file 2) $gradients
+    matrix_add_inplace $gradients $(tmp_name 2) $gradients
+}
+
+function fit_input()
+{
+
 }
 
 function fit_output()
 {
-    local cost="$2"
-    local layerid="$3"
+    local cost="$1"
+    local layerid="$2"
 
     local gradients="$(predict_name $layerid gradients)"
 
@@ -52,12 +57,11 @@ function fit_sample()
     output_file="$(predict_name 0 output)"
     label_file=$2
 
-
+    typeset -i i
     for ((i = nb_layer - 1; i >= 0; i--));
     do
         read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
-
-        fit_"$layer_type" "$genome_dir/topology/layer_$i" "$activation" "$i"
+        fit_"$layer_type" "$activation" "$i"
     done
 }
 
@@ -68,6 +72,7 @@ function fit_batch_part()
 
     shift 2
 
+    local v
     for v in "$@";
     do
         fit_sample "${MODEL}/x_train/$v" "${MODEL}/y_train/$v"
@@ -79,12 +84,19 @@ function fit_batch_part()
 # Backpropagation for a batch
 function fit_batch()
 {
+    local i
+
+    for ((i = 0; i < nb_layer; i++));
+    do
+        local p="${MODEL}/genomes/gen_$gen_id/topology/layer_$i"
+        matrix_transpose < "$p/weights.dat" > "$p/weights_t.dat"
+    done
+
     # Fork nb_proc times in order to train a part of the batch
     pids=()
 
     for (( i = 0; i < nb_proc; i++ ));
     do
-        echo $((i + 1)) $batch_size $nb_proc
         beg=$((i * batch_size / nb_proc))
         en=$(((i + 1.0) * batch_size / nb_proc - 1))
         en=$((int(rint(en))))
@@ -96,13 +108,14 @@ function fit_batch()
 
         vec=()
 
+        local j
         for (( j = beg; j < en; j++ ));
         do
             vec[$((j - beg + 1))]=$1
             shift 1
         done
 
-        zsh ./training/_batch_part.zsh "$gen_id" "$batch_size" $vec
+        zsh ./training/_batch_part.zsh "$gen_id" "$batch_size" $vec &
         pids[$((i + 1))]="$!"
     done
 
@@ -122,9 +135,9 @@ function fit_batch()
     for (( i = 0; i < nb_layers; i++ ));
     do
         matrix_mul_scalar $((1.0 * learning_rate / batch_size)) \
-                < "$(predict_name $i gradients)" > "$(tmp_file 0)"
+                < "$(predict_name $i gradients)" > "$(tmp_name 0)"
 
-        matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_file 0)"
+        matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_name 0)"
     done
 }
 
@@ -138,12 +151,14 @@ function fit()
 
     # Get model's layer count
     matrix_load _ _ metadata < "${genome_dir}/meta.dat"
-    export nb_layer=${metadata[3]}
+    nb_layer=${metadata[3]}
 
     # Get features vector in a random order
     cd ${MODEL}/x_train
     local features=($(echo "$(ls)" | shuf)) 
     cd -
+
+    local i
 
     for (( nb=${#features[@]}; nb > 0; nb -= batch_size ));
     do
@@ -154,7 +169,5 @@ function fit()
 
         local start=$((nb - batch_size))
         fit_batch ${features:$start:$nb}
-
-        echo "Batch done"
     done
 }

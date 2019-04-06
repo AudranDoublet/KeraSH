@@ -2,5 +2,5 @@
 
 source ./kera.sh
 
-mkdir -p "${MAT}/$$"
+mkdir -p "${MAT}/$$/tmp"
 fit_batch_part "$@"

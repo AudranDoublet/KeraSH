@@ -17,6 +17,7 @@ function matrix_add()
     size=$((w1 * h1))
     echo $w1 $h1
 
+    local i
     for ((i = 1; i <= size; i++));
     do
         echo $((a1[i] + a2[i]))
@@ -28,15 +29,19 @@ function matrix_add()
 # print sum of FD:3 and FD:4 matrix in stdout
 function matrix_add_inplace()
 {
-    if ! matrix_load w1 h1 a1 < "$1";
+    if [[ ! ( -a "$1" ) ]]
     then
         cp "$2" "$3"
         return 0
     fi
 
+    matrix_load w1 h1 a1 < "$1"
+    matrix_load w2 h2 a2 < "$2"
+
     if (( w1 != w2 || h1 != h2 ));
     then
-        echo "matrix_add: matrices have different size" >&2
+        echo "matrix_add_inplace: matrices have different size" >&2
+        exit 1
         return 1
     fi
 
@@ -45,6 +50,7 @@ function matrix_add_inplace()
     {
         echo $w1 $h1
 
+        local i
         for ((i = 1; i <= size; i++));
         do
             echo $((a1[i] + a2[i]))
@@ -69,6 +75,8 @@ function matrix_sub()
     size=$((w1 * h1))
     echo $w1 $h1
 
+    local i
+
     for ((i = 1; i <= size; i++));
     do
         echo $((a1[i] - a2[i]))
@@ -84,6 +92,8 @@ function matrix_transpose()
 
     echo $h1 $w1
 
+    local x
+    local y
     for ((x = 0; x < w1; x++));
     do
         for ((y = 0; y < h1; y++));
@@ -108,6 +118,7 @@ function matrix_mul_scalar()
     size=$((w1 * h1))
     echo $w1 $h1
 
+    local i
     for ((i = 1; i <= size; i++));
     do
         echo $((a1[i] * scalar))
@@ -125,13 +136,14 @@ function matrix_mul_p2p()
 
     if (( w1 != w2 || h1 != h2 ));
     then
-        echo "matrix_mul_p2p: matrices have different size"
+        echo "matrix_mul_p2p: matrices have different size" >&2
         return 1
     fi
 
     size=$((w1 * h1))
     echo $w1 $h1
 
+    local i
     for ((i = 1; i <= size; i++));
     do
         echo $((a1[i] * a2[i]))
@@ -149,6 +161,7 @@ function matrix_mul_self_p2p()
     size=$((w1 * h1))
     echo $w1 $h1
 
+    local i
     for ((i = 1; i <= size; i++));
     do
         echo $((a1[i] * a1[i]))
@@ -174,6 +187,10 @@ function matrix_mul()
     float sum
 
     echo $w2 $h1
+
+    local i
+    local j
+    local k
 
     for ((i = 0; i < h1; i++));
     do
@@ -210,6 +227,10 @@ function matrix_square()
 
     echo $w1 $h1
 
+    local i
+    local j
+    local k
+
     for ((i = 0; i < h1; i++));
     do
         for ((j = 0; j < w1; j++));
@@ -236,6 +257,8 @@ function matrix_apply()
 
     size=$((w1 * h1))
     echo $w1 $h1
+
+    local i
 
     for ((i = 1; i <= size; i++));
     do
