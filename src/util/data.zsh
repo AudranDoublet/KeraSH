@@ -58,27 +58,50 @@ function generate_data()
     vectorize "${y_train_path}" "${y_val_path}" "${file_y}" "${train_samples}"
 }
 
+function parse_dense()
+{
+    layer_activation=$2
+
+    height="$width"
+    width="$1"
+}
+
+function parse_input()
+{
+    layer_activation="-"
+}
+
+function parse_output()
+{
+    layer_activation="$1"
+}
+
 function parse_model()
 {
     local model_file=$1
     local genome_dir=$2
 
-    read input_size output_size < "${model_file}"
+    read width height < "${model_file}"
 
     local layer_id=0
     local layer_path=""
     local last_layer_size=$input_size
 
-    for layer_type layer_size layer_activation in $(tail -n +2 "${model_file}");
+    local layer_activation=""
+
+    tail -n +2 "${model_file}" | while read layer_type layer_param;
     do
         layer_path="${genome_dir}/topology/layer_${layer_id}"
         mkdir -p "${layer_path}"
+
+        parse_"$layer_type" $layer_param
+
         echo "${layer_activation} ${layer_type}" > "${layer_path}/meta.dat"
-        matrix_random $layer_size $last_layer_size > "${layer_path}/weights.dat"
-        last_layer_size=$layer_size
+
+        matrix_random $width $height > "${layer_path}/weights.dat"
         layer_id=$(( layer_id + 1 ))
     done
 
-    matrix_create_direct 3 1 $input_size $output_size $layer_id \
+    matrix_create_direct 3 1 $width $height $layer_id \
                                                 > "${genome_dir}/meta.dat"
 }

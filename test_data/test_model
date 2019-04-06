@@ -1,5 +1,5 @@
 2 1
-input 2 -
+input
 dense 3 sigmoid
 dense 1 sigmoid
-output 1 mse
+output mse
