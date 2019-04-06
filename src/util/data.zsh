@@ -75,7 +75,7 @@ function parse_model()
     local last_layer_size=$input_size
     for layer_type layer_size layer_activation in $(tail -n +2 "${model_file}");
     do
-        layer_path="${genome_dir}/topology/layer_${layer_id}_${layer_type}"
+        layer_path="${genome_dir}/topology/layer_${layer_id}"
         mkdir -p "${layer_path}"
         echo "${layer_activation}\n${layer_type}" > "${layer_path}/meta.dat"
         matrix_random $layer_size $last_layer_size > "${layer_path}/weights.dat"
