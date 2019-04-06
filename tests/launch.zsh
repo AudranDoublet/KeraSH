@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+export TMP="$(mktemp -d)"
+
 function run_test()
 {
     local ABS="$(pwd)/$1"
