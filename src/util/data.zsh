@@ -63,23 +63,22 @@ function parse_model()
     local model_file=$1
     local genome_dir=$2
 
-    read x_y_sizes < "${model_file}"
-
-    matrix_create_direct 2 1 ${x_y_sizes} > "${genome_dir}/meta.dat"
-    matrix_load < "${genome_dir}/meta.dat"
-    local input_size=$array[1]
-    local output_size=$array[2]
+    read input_size output_size < "${model_file}"
 
     local layer_id=0
     local layer_path=""
     local last_layer_size=$input_size
+
     for layer_type layer_size layer_activation in $(tail -n +2 "${model_file}");
     do
         layer_path="${genome_dir}/topology/layer_${layer_id}"
         mkdir -p "${layer_path}"
-        echo "${layer_activation}\n${layer_type}" > "${layer_path}/meta.dat"
+        echo "${layer_activation} ${layer_type}" > "${layer_path}/meta.dat"
         matrix_random $layer_size $last_layer_size > "${layer_path}/weights.dat"
         last_layer_size=$layer_size
         layer_id=$(( layer_id + 1 ))
     done
+
+    matrix_create_direct 3 1 $input_size $output_size $layer_id \
+                                                > "${genome_dir}/meta.dat"
 }
