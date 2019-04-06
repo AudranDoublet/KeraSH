@@ -29,3 +29,4 @@ done
 
 cd ..
 
+rm -rf ./src/kerash_mountpoint
