@@ -2,6 +2,8 @@
 
 export TMP="$(mktemp -d)"
 
+mkdir -p ./src/kerash_mountpoint/mat
+
 function run_test()
 {
     local ABS="$(pwd)/$1"
@@ -24,3 +26,6 @@ for v in $(find -mindepth 2 -type f -name '*.zsh' | sort);
 do
     run_test $v
 done
+
+cd ..
+
