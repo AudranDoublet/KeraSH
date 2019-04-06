@@ -120,7 +120,7 @@ function matrix_mul()
 
     if (( w1 != h2 ));
     then
-        echo "matrix_mul: matrix A width <> matrix B height"
+        echo "matrix_mul: matrix A width <> matrix B height" >&2
         return 1
     fi
 
@@ -151,7 +151,13 @@ function matrix_mul()
 # print on stdout
 function matrix_square()
 {
-    matrix_load w1 h1 a1
+    matrix_load w1 h1 a
+
+    if (( w1 != h1 ));
+    then
+        echo "matrix_square: matrix width <> height" >&2
+        return 1
+    fi
 
     local sum
     float sum
