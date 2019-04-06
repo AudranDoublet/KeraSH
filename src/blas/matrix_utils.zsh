@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 zmodload zsh/mathfunc
+zmodload zsh/mapfile
 
 #   Usage
 # print matrix from stdin in stdout
@@ -27,14 +28,16 @@ function matrix_print()
 # matrix_load <width:var (width)> <height:var (height)> <array:var (array)>
 function matrix_load()
 {
+    local val=( "${(f)mapfile[/proc/self/fd/0]}" )
+
     if (($# == 0));
     then
-        read width height
-        array=($(<&0))
+        read width height <<< ${val[1]}
+        array=( ${val:1} )
     elif (($# == 3))
     then
-        read "$1" "$2"
-        eval "$3=($(<&0))"
+        read "$1" "$2" <<< ${val[1]}
+        eval "$3=(${val:3})"
     else
         return 1
     fi
