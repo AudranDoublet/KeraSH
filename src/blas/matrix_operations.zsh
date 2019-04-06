@@ -145,6 +145,35 @@ function matrix_mul()
     done
 }
 
+#  Usage
+#
+# square of matrix A (fd: stdin)
+# print on stdout
+function matrix_square()
+{
+    matrix_load w1 h1 a1
+
+    local sum
+    float sum
+
+    echo $w1 $h1
+
+    for ((i = 0; i < h1; i++));
+    do
+        for ((j = 0; j < w1; j++));
+        do
+            sum=0.
+
+            for ((k = 0; k < w1; k++));
+            do
+                ((sum += a1[k + i * w1 + 1] * a2[j + k * w1 + 1]))
+            done
+
+            echo "$sum"
+        done
+    done
+}
+
 #   Usage
 #
 # apply function to all elements of matrix A (stdin)
