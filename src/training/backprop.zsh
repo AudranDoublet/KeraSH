@@ -4,28 +4,34 @@ function fit_dense()
 {
     local activation="$1"
     local layerid="$2"
+    local out="$3"
     local nextlayer=$((layerid + 1))
     local prevlayer=$((layerid - 1))
     local dir="${MODEL}/genomes/gen_${gen_id}/topology/layer_$nextlayer"
 
     local gradients="$(predict_name $layerid gradients)"
 
-    # Tmp = (DELTAn+1 * W_t(n+1)
-    matrix_mul 3< "$(predict_name $nextlayer delta)" 4< "$dir/weights_t.dat" \
-                 > "$(tmp_name 1)"
+    if (( $out == 1 ));
+    then
+        cost_mse $(predict_name $layerid activation) $label_file $batch_size > $(predict_name $layerid cost)
+    else
+        # Tmp = (DELTAn+1 * W_t(n+1)
+        matrix_mul 3< "$(predict_name $nextlayer delta)" 4< "$dir/weights_t.dat" \
+                     > "$(predict_name $layerid cost)"
+    fi
 
     # S'(Zn)
-    matrix_apply "activ_d_$activation" < $(predict_name $layerid activity) \
+    matrix_apply "activ_d_$activation" < $(predict_name $layerid activation) \
                                        > "$(tmp_name 2)"
 
     # DELTAn = Tmp*S'(Zn)
-    matrix_mul_p2p 3< "$(tmp_name 1)"  4< "$(tmp_name 2)" > "$(predict_name $layerid delta)"
+    matrix_mul_p2p 3< "$(predict_name $layerid cost)"  4< "$(tmp_name 2)" > "$(predict_name $layerid delta)"
 
     # A_t(n-1)
-    matrix_transpose < "$(predict_name $layerid activation)" > "$(tmp_name 1)"
+    matrix_transpose < "$(predict_name $prevlayer activation)" > "$(tmp_name 3)"
 
     # Gradient = DELTAn * A_t(n-1)
-    matrix_mul 3< "$(predict_name $layerid delta)" 4< "$(tmp_name 1)" > "$(tmp_name 2)"
+    matrix_mul 4< "$(predict_name $layerid delta)" 3< "$(tmp_name 3)" > "$(tmp_name 2)"
 
     # Gradient sum
     matrix_add_inplace $gradients $(tmp_name 2) $gradients
@@ -34,17 +40,6 @@ function fit_dense()
 function fit_input()
 {
 
-}
-
-function fit_output()
-{
-    local cost="$1"
-    local layerid="$2"
-
-    local gradients="$(predict_name $layerid gradients)"
-
-    cost_"$cost" $output_file $label_file $batch_size > $(predict_name $layerid delta)
-    matrix_add_inplace $gradients $(predict_name $layerid delta) $gradients
 }
 
 #   Usage
@@ -61,7 +56,13 @@ function fit_sample()
     for ((i = nb_layer - 1; i >= 0; i--));
     do
         read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
-        fit_"$layer_type" "$activation" "$i"
+
+        if (( i == nb_layer - 1 ));
+        then
+            fit_"$layer_type" "$activation" "$i" 1
+        else
+            fit_"$layer_type" "$activation" "$i" 0
+        fi
     done
 }
 
@@ -130,6 +131,12 @@ function fit_batch()
             matrix_add_inplace "$(predict_name $i gradients)" \
                 "${MAT}/$pid/${i}_gradients.dat" "$(predict_name $i gradients)"
         done
+
+        typeset -i last
+        last=$((nb_layer-1))
+
+        matrix_add_inplace "$(predict_name 0 cost)" \
+                "${MAT}/$pid/${last}_cost.dat" "$(predict_name 0 cost)"
     done
 
     # Apply learning rate/gradient on each layer
@@ -138,10 +145,11 @@ function fit_batch()
         matrix_mul_scalar $((- 1.0 * learning_rate / batch_size)) \
                 < "$(predict_name $i gradients)" > "$(tmp_name 0)"
 
-        matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_name 0)"
+        matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_name 0)" "$genome_dir/topology/layer_$i/weights.dat"
     done
 
-    matrix_print < "$(tmp_name 0)"
+    matrix_mul_scalar $(( 1.0 / batch_size )) < "$(predict_name 0 cost)" > "$(tmp_name 0)"
+    echo Epoch: $(matrix_print < "$(tmp_name 0)")
 }
 
 function fit_epoch()

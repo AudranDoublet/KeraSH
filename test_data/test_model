@@ -2,4 +2,3 @@
 input
 dense 10 sigmoid
 dense 1 sigmoid
-output mse

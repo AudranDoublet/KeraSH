@@ -37,7 +37,7 @@ function activ_d_binarystep()
 
 function activ_sigmoid()
 {
-    echo $(( 1. / (1. + exp(-$1)) ))
+    echo $(( 1. / (1. + exp(-+$1)) ))
 }
 
 function activ_d_sigmoid()

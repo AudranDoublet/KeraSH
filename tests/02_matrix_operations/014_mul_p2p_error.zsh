@@ -12,7 +12,7 @@ then
     exit 2
 fi
 
-if matrix_mul_p2p > $TMP/res 3< $TMP/out 4< $TMP/out2;
+if matrix_mul_p2p > $TMP/res 3< $TMP/out 4< $TMP/out2 2> /dev/null;
 then
     exit 3
 fi
