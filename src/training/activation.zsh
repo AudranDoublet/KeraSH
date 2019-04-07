@@ -42,7 +42,7 @@ function activ_sigmoid()
 
 function activ_d_sigmoid()
 {
-    echo $(( $(activ_sigmoid "$@") * (1 - $(activ_sigmoid "$@")) ))
+    echo $(( $(activ_sigmoid "$1") * (1.0 - $(activ_sigmoid "$1")) ))
 }
 
 function activ_tanh()
