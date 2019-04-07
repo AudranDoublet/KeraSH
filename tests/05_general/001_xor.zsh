@@ -9,7 +9,7 @@ init_fs
 store_model "xor" ../test_data/test_model ../test_data/test_data ../test_data/test_label
 create_genome "xor" "${MODEL}/xor.model"
 
-fit 250000 "xor" 1 1 0.1
+fit 10 "xor" 1 1 0.001
 
 # Backup data and end file system
 #mkdir -p "./kerash_data"
