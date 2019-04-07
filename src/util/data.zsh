@@ -99,6 +99,7 @@ function parse_model()
         echo "${layer_activation} ${layer_type}" > "${layer_path}/meta.dat"
 
         matrix_random $width $height > "${layer_path}/weights.dat"
+        matrix_random $width  1 > "${layer_path}/bias_weights.dat"
         layer_id=$(( layer_id + 1 ))
     done
 
