@@ -7,34 +7,39 @@ function fit_dense()
     local out="$3"
     local nextlayer=$((layerid + 1))
     local prevlayer=$((layerid - 1))
-    local dir="${MODEL}/genomes/gen_${gen_id}/topology/layer_$nextlayer"
+    local dir="${MODEL}/genomes/gen_${gen_id}/topology/layer_$layerid"
 
     local gradients="$(predict_name $layerid gradients)"
 
     if (( $out == 1 ));
     then
+        cost_d_mse $(predict_name $layerid activation) $label_file $batch_size > $(tmp_name 1)
+        matrix_mul_scalar $(( -1.0 )) < $(tmp_name 1) > $(predict_name $nextlayer delta)
         cost_mse $(predict_name $layerid activation) $label_file $batch_size > $(predict_name $layerid cost)
-    else
-        # Tmp = (DELTAn+1 * W_t(n+1)
-        matrix_mul 3< "$(predict_name $nextlayer delta)" 4< "$dir/weights_t.dat" \
-                     > "$(predict_name $layerid cost)"
     fi
 
     # S'(Zn)
-    matrix_apply "activ_d_$activation" < $(predict_name $layerid activation) \
+    matrix_apply "activ_d_$activation" < $(predict_name $layerid activity) \
                                        > "$(tmp_name 2)"
 
-    # DELTAn = Tmp*S'(Zn)
-    matrix_mul_p2p 3< "$(predict_name $layerid cost)"  4< "$(tmp_name 2)" > "$(predict_name $layerid delta)"
+    # DELTAn = DELTA(n+1) o S'(Zn)
+    matrix_mul_p2p 3< "$(predict_name $nextlayer delta)"  4< "$(tmp_name 2)" > "$(tmp_name 4)"
 
     # A_t(n-1)
     matrix_transpose < "$(predict_name $prevlayer activation)" > "$(tmp_name 3)"
 
-    # Gradient = DELTAn * A_t(n-1)
-    matrix_mul 4< "$(predict_name $layerid delta)" 3< "$(tmp_name 3)" > "$(tmp_name 2)"
+    # Gradient = A_t(n-1)*DELTAn
+    matrix_mul 4< "$(tmp_name 4)" 3< "$(tmp_name 3)" > "$(tmp_name 2)"
+
+    # Bias Gradient = DELTAn
+    matrix_mul_scalar 1.0 < "$(tmp_name 4)" > "$(predict_name $layerid bias_gradients)"
 
     # Gradient sum
     matrix_add_inplace $gradients $(tmp_name 2) $gradients
+
+    # DELTA(n) = DELTA(n) * W_Tn
+    matrix_mul 3< "$(tmp_name 4)" 4< "$dir/weights_t.dat" \
+                     > "$(predict_name $layerid delta)"
 }
 
 function fit_input()
@@ -64,6 +69,12 @@ function fit_sample()
             fit_"$layer_type" "$activation" "$i" 0
         fi
     done
+    #echo "Input:"
+    #cat < "$1"
+    #echo "Output:"
+    #cat < "$(predict_name 2 activation)"
+    #echo "Expected:":
+    #cat < "$2"
 }
 
 function fit_batch_part()
@@ -72,7 +83,6 @@ function fit_batch_part()
     batch_size=$2
 
     shift 2
-
     local v
     for v in "$@";
     do
@@ -86,7 +96,6 @@ function fit_batch_part()
 function fit_batch()
 {
     local i
-
     for ((i = 0; i < nb_layer; i++));
     do
         local p="${MODEL}/genomes/gen_$gen_id/topology/layer_$i"
@@ -95,11 +104,10 @@ function fit_batch()
 
     # Fork nb_proc times in order to train a part of the batch
     pids=()
-
     for (( i = 0; i < nb_proc; i++ ));
     do
         beg=$((i * batch_size / nb_proc))
-        en=$(((i + 1.0) * batch_size / nb_proc - 1))
+        en=$(((i + 1.0) * batch_size / nb_proc))
         en=$((int(rint(en))))
 
         if (( beg == en ));
@@ -130,6 +138,9 @@ function fit_batch()
         do
             matrix_add_inplace "$(predict_name $i gradients)" \
                 "${MAT}/$pid/${i}_gradients.dat" "$(predict_name $i gradients)"
+
+            matrix_add_inplace "$(predict_name $i bias_gradients)" \
+                "${MAT}/$pid/${i}_bias_gradients.dat" "$(predict_name $i bias_gradients)"
         done
 
         typeset -i last
@@ -145,11 +156,16 @@ function fit_batch()
         matrix_mul_scalar $((- 1.0 * learning_rate / batch_size)) \
                 < "$(predict_name $i gradients)" > "$(tmp_name 0)"
 
+        matrix_mul_scalar $((- 1.0 * learning_rate / batch_size)) \
+                < "$(predict_name $i bias_gradients)" > "$(tmp_name 2)"
+
         matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_name 0)" "$genome_dir/topology/layer_$i/weights.dat"
+        matrix_add_inplace "$genome_dir/topology/layer_$i/bias_weights.dat" "$(tmp_name 2)" "$genome_dir/topology/layer_$i/bias_weights.dat"
     done
 
     matrix_mul_scalar $(( 1.0 / batch_size )) < "$(predict_name 0 cost)" > "$(tmp_name 0)"
-    echo Epoch: $(matrix_print < "$(tmp_name 0)")
+    echo Epoch: ${epoch_counter} Batch: ${batch_counter} cost: $(tail -n +2 "$(tmp_name 0)")
+    rm -f "$(predict_name 0 cost)"
 }
 
 function fit_epoch()
@@ -159,8 +175,8 @@ function fit_epoch()
     local features=($(echo "$(ls)" | shuf)) 
     cd -
 
+    local batch_counter=0
     local i
-
     for (( nb=${#features[@]}; nb > 0; nb -= batch_size ));
     do
         if (( nb < batch_size ));
@@ -170,6 +186,7 @@ function fit_epoch()
 
         local start=$((nb - batch_size))
         fit_batch ${features:$start:$nb}
+        batch_counter=$(( batch_counter + 1))
     done
 }
 
@@ -187,9 +204,11 @@ function fit()
     matrix_load _ _ metadata < "${genome_dir}/meta.dat"
     nb_layer=${metadata[3]}
 
+    local epoch_counter=0
     local i
     for (( i = 0; i < epoch_count; i++ ));
     do
         fit_epoch
+        epoch_counter=$((epoch_counter + 1))
     done
 }
