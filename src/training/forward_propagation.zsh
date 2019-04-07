@@ -10,6 +10,8 @@ function predict_dense()
                 4< "${dir}/weights.dat" \
                  > "$(predict_name $layerid activity)"
 
+    matrix_add_inplace "$(predict_name $layerid activity)" "${dir}/bias_weights.dat" "$(predict_name $layerid activity)"
+
     matrix_apply activ_$activation < "$(predict_name $layerid activity)" \
                                    > "$(predict_name $layerid activation)"
 
