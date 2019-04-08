@@ -87,3 +87,36 @@ function tensor_create_fill()
         echo "$val"
     done
 }
+
+#   Usage
+#
+# write a new tensor in STDOUT, filled with parameters
+#
+# tensor_create_direct <width> <height> <depth> <values...>
+function tensor_create_direct()
+{
+    if ! tensor_create $1 $2 $3; then
+        return 1
+    fi
+
+    local val
+    typeset -F val
+
+    size=$(($1 * $2 * $3))
+
+    shift 3
+
+    local i
+    for ((i = 0; i < size; i++))
+    do
+        if (($# > 0));
+        then
+            val=$1
+            shift 1
+        else
+            val=0.
+        fi
+
+        echo $val
+    done
+}
