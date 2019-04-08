@@ -1,5 +1,6 @@
 source ./memory/memory.zsh
 source ./util/data.zsh
+source ./blas/import.zsh
 
 function matrix_namer()
 {
@@ -33,4 +34,19 @@ function create_genome()
     mkdir -p "${genome_dir}/topology"
     parse_model "${model_file}" "${genome_dir}"
     echo "${genome_dir}"
+}
+
+function ensure_layers_compatibility()
+{
+    local genome_id=$1
+    local curr_layer_id=$2
+    local curr_layer_mutation_delta=$3
+
+    local layer_to_update_id=$((curr_layer_id + 1))
+    local layer_to_update="${MODEL}/gen_${genome_id}/topology/layer_${layer_to_update_id}/"
+
+    matrix_load w h < "${layer_to_update}/weights.dat"
+    local new_height=$(( h + curr_layer_mutation_delta ))
+    matrix_resize $w $new_height "${layer_to_update}/weights.dat"
+    matrix_resize $new_height $w "${layer_to_update}/weights_t.dat"
 }
