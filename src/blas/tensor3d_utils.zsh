@@ -37,3 +37,53 @@ function tensor_create()
 
     echo "$1" "$2" "$3"
 }
+
+#   Usage
+#
+# write a new random tensor in STDOUT
+#
+# tensor_random <width> <height> <depth>
+function tensor_random()
+{
+    if ! tensor_create $1 $2 $3; then
+        return 1
+    fi
+
+    size=$(($1*$2*$3))
+
+    local i
+    for ((i = 0; i < size; i++));
+    do
+        echo $(( rand48() ))
+    done
+}
+
+#   Usage
+#
+# write a new tensor in STDOUT, filled with 1 or parameters.
+#
+# tensor_create_fill <width> <height> <depth> <value (def: 1.0)>
+function tensor_create_fill()
+{
+    if ! tensor_create $1 $2 $3; then
+        return 1
+    fi
+
+    local val
+    typeset -F val
+
+    if (($# != 4));
+    then
+        val=1.0
+    else
+        val="$4"
+    fi
+
+    size=$(($1*$2*$3))
+
+    local i
+    for ((i = 0; i < size; i++));
+    do
+        echo "$val"
+    done
+}
