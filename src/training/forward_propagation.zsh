@@ -58,6 +58,14 @@ function predict_convolution()
                                    > "${input_file}"
 }
 
+function predict_flatten()
+{
+    local dir="$1"
+
+    tensor_flatten < "${input_file}" > "$(predict_name $layerid activation)"
+    input_file="$(predict_name $layerid activation)"
+}
+
 function predict_output()
 {
     cp "$input_file" "$(predict_name 0 output)"
