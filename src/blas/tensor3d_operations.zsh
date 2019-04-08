@@ -97,6 +97,24 @@ function tensor_apply_convolution()
     done
 }
 
+function tensor_reduce()
+{
+    f=$1
+    tensor_load w1 h1 d1 a1
+
+    size=$((w1 * h1 * d1))
+
+    typeset -F res="${a1[i]}"
+    local i
+
+    for ((i = 2; i <= size; i++));
+    do
+        res=$($f $res ${a1[i]})
+    done
+
+    echo $res
+}
+
 function tensor_apply()
 {
     tensor_load w1 h1 d1 a1
