@@ -166,7 +166,7 @@ function fit_batch()
     done
 
     matrix_mul_scalar $(( 1.0 / batch_size )) < "$(predict_name 0 cost)" > "$(tmp_name 0)"
-    echo Epoch: ${epoch_counter} Batch: ${batch_counter} cost: $(tail -n +2 "$(tmp_name 0)")
+    printf "Epoch: %4i Batch: %4i cost: %f\n" ${epoch_counter} ${batch_counter} $(tail -n +2 "$(tmp_name 0)")
     rm -f ${MAT}/$$/*.dat
 }
 
