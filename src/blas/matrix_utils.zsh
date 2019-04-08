@@ -28,16 +28,12 @@ function matrix_print()
 # matrix_load <width:var (width)> <height:var (height)> <array:var (array)>
 function matrix_load()
 {
-    local val=( "${(f)mapfile[/proc/self/fd/0]}" )
-
     if (($# == 0));
     then
-        read width height <<< ${val[1]}
-        array=( ${val:1} )
+        tensor_load
     elif (($# == 3))
     then
-        read "$1" "$2" <<< ${val[1]}
-        eval "$3=(${val:4})"
+        tensor_load "$1" "$2" "_" "$3"
     else
         return 1
     fi
@@ -49,13 +45,7 @@ function matrix_load()
 # matrix_create <width> <height>
 function matrix_create()
 {
-    if (($# != 2));
-    then
-        echo "matrix_create: bad usage" >&2
-        return 1
-    fi
-
-    echo "$1 $2" # nb_lines, nb_col
+    tensor_create $1 $2 1
 }
 
 #   Usage
@@ -64,17 +54,7 @@ function matrix_create()
 # matrix_random <width> <height>
 function matrix_random()
 {
-    if ! matrix_create "$1" "$2"; then
-        return 1
-    fi
-
-    size=$(($1*$2))
-
-    local i
-    for ((i = 0; i < size; i++));
-    do
-        echo $(( rand48() ))
-    done
+    tensor_random $1 $2 1
 }
 
 #   Usage
@@ -83,27 +63,7 @@ function matrix_random()
 # matrix_create_fill <width> <height> <value:float (1)>
 function matrix_create_fill()
 {
-    if ! matrix_create "$1" "$2"; then
-        return 1
-    fi
-
-    local val
-    typeset -F val
-
-    if (($# != 3));
-    then
-        val=1.0
-    else
-        val="$3"
-    fi
-
-    size=$(($1*$2))
-
-    local i
-    for ((i = 0; i < size; i++));
-    do
-        echo "$val"
-    done
+    tensor_create_fill $1 $2 1 $3
 }
 
 #   Usage
@@ -112,28 +72,10 @@ function matrix_create_fill()
 # matrix_create_direct <width> <height> <floats...>
 function matrix_create_direct()
 {
-    if ! matrix_create "$1" "$2"; then
-        return 1
-    fi
-
-    local val
-    typeset -F val
-
-    size=$(($1*$2))
+    w=$1
+    h=$2
 
     shift 2
 
-    local i
-    for ((i = 0; i < size; i++))
-    do
-        if (($# > 0));
-        then
-            val=$1
-            shift 1
-        else
-            val=0.
-        fi
-
-        echo $val
-    done
+    tensor_create_direct $w $h 1 "$@"
 }

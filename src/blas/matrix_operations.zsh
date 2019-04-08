@@ -15,7 +15,7 @@ function matrix_add()
     fi
 
     size=$((w1 * h1))
-    echo $w1 $h1
+    echo $w1 $h1 1
 
     local i
     for ((i = 1; i <= size; i++));
@@ -49,7 +49,7 @@ function matrix_add_inplace()
     size=$((w1 * h1))
 
     {
-        echo $w1 $h1
+        echo $w1 $h1 1
 
         local i
         for ((i = 1; i <= size; i++));
@@ -74,7 +74,7 @@ function matrix_sub()
     fi
 
     size=$((w1 * h1))
-    echo $w1 $h1
+    echo $w1 $h1 1
 
     local i
 
@@ -91,7 +91,7 @@ function matrix_transpose()
 {
     matrix_load w1 h1 a1
 
-    echo $h1 $w1
+    echo $h1 $w1 1
 
     local x
     local y
@@ -117,7 +117,7 @@ function matrix_mul_scalar()
     scalar=$1
 
     size=$((w1 * h1))
-    echo $w1 $h1
+    echo $w1 $h1 1
 
     local i
     for ((i = 1; i <= size; i++));
@@ -163,7 +163,7 @@ function matrix_resize()
     oldsize=$((w * h))
 
     {
-        echo $w1 $h1
+        echo $w1 $h1 1
 
         for ((i = 1; i <= newsize; i++));
         do
@@ -221,7 +221,7 @@ function matrix_mul_p2p()
     fi
 
     size=$((w1 * h1))
-    echo $w1 $h1
+    echo $w1 $h1 1
 
     local i
     for ((i = 1; i <= size; i++));
@@ -239,7 +239,7 @@ function matrix_mul_self_p2p()
     matrix_load w1 h1 a1
 
     size=$((w1 * h1))
-    echo $w1 $h1
+    echo $w1 $h1 1
 
     local i
     for ((i = 1; i <= size; i++));
@@ -266,7 +266,7 @@ function matrix_mul()
     local sum
     float sum
 
-    echo $w2 $h1
+    echo $w2 $h1 1
 
     local i
     local j
@@ -305,7 +305,7 @@ function matrix_square()
     local sum
     float sum
 
-    echo $w1 $h1
+    echo $w1 $h1 1
 
     local i
     local j
@@ -336,7 +336,7 @@ function matrix_apply()
     matrix_load w1 h1 a1
 
     size=$((w1 * h1))
-    echo $w1 $h1
+    echo $w1 $h1 1
 
     local i
 
