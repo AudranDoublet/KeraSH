@@ -149,6 +149,34 @@ function matrix_mean()
     echo $((sum / size))
 }
 
+# Usage
+# Resize a matrix and
+# fill new datas with random values
+# matrix_resize <new_width> <new_height> <file>
+function matrix_resize()
+{
+    w1=$1
+    h1=$2
+    newsize=$((w1 * h1))
+
+    matrix_load w h a < "$3"
+    oldsize=$((w * h))
+
+    {
+        echo $w1 $h1
+
+        for ((i = 1; i <= newsize; i++));
+        do
+            if ((i <= oldsize));
+            then
+                echo ${a[i]}
+            else
+                echo $((rand48()))
+            fi
+        done
+    } > "$3"
+}
+
 #   Usage
 # check if matrices A and B are similar, meaning that the difference between
 # Ai,j and Bi,j is smaller than lambda
