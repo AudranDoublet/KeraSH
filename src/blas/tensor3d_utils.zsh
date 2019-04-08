@@ -120,3 +120,24 @@ function tensor_create_direct()
         echo $val
     done
 }
+
+#   Usage
+#
+# change cell <x, y, z> of tensor <file>
+# tensor_change_cell <file> <val> <x (width)> <y (height)> <z (depth, def = 1)>
+function tensor_change_cell()
+{
+    x="$3"
+    y="$4"
+    z="$5"
+
+    if (( $# == 4 ));
+    then
+        z=1
+    fi
+
+    tensor_load < "$1"
+
+    array[$((x + y*width + z*height*width))]="$2"
+    tensor_create_direct $width $height $depth $array
+}
