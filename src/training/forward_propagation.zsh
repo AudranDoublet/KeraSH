@@ -73,8 +73,8 @@ function predict_max_pooling()
     {
         echo $w1 $h1 $d1
 
-        tensor_apply_convreduce $stride $pad $w1 $h1 "tensor_reduce g_max" \
-                        < "${input_file}"
+        tensor_apply_convreduce $stride $pad $w1 $h1 $kernel_w \
+                "tensor_reduce g_max" 3< "${input_file}"
     } > "$(predict_name $layerid activity)"
 
     input_file="$(predict_name $layerid activation)"

@@ -70,7 +70,7 @@ function tensor_apply_convolution()
 
     local f=$5
 
-    local d=0 x=0 y=0
+    local z=0 x=0 y=0
 
     read _w1 _h1 _d1 <&3
     read _w2 _h2 _d2 <&4
@@ -102,30 +102,22 @@ function tensor_apply_convreduce()
     local pad=$2
     local count_x=$3
     local count_y=$4
+    local kernel=$5 
 
-    local f=$5
+    local f=$6
 
-    local d=0
-    local x=0
-    local y=0
+    local z=0 x=0 y=0
 
-    read w1 h1 d1 <&3
-    read w2 h2 d2 <&4
+    read _w1 _h1 _d1 <&3
 
-    if (( d1 != d2 ));
-    then
-        echo "tensor_apply_convreduce: different depth"
-        return 1
-    fi
-
-    for (( d = 0; d < d1; d++ ));
+    for (( z = 0; d < _d1; z++ ));
     do
         for (( y = 0; y < count_y; y++ ));
         do
             for (( x = 0; x < count_x; x++ ));
             do
-                tensor_slice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 1)
-                $f < $(tmp_name 1)
+                tensor_slice $((x * stride)) $((y * stride)) $z $kernel $kernel 1 $pad <&3 > $(tmp_name 1)
+                $(echo $f) < $(tmp_name 1)
             done
         done
     done
@@ -139,12 +131,12 @@ function tensor_apply_convreduce()
 # tensor_reduce <f>
 function tensor_reduce()
 {
-    f=$1
+    local f="$1"
     tensor_load w1 h1 d1 a1
 
     size=$((w1 * h1 * d1))
 
-    typeset -F res="${a1[i]}"
+    typeset -F res="${a1[1]}"
     local i
 
     for ((i = 2; i <= size; i++));
