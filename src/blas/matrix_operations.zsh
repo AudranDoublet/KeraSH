@@ -248,6 +248,34 @@ function matrix_mul_self_p2p()
     done
 }
 
+#   Usage
+#
+# Apply a 2d convolution kernel (fd: 4) on a matrix-part (fd: 3)
+# Print a float on stdout
+function matrix_conv()
+{
+    matrix_load w1 h1 a1 <&3
+    matrix_load w2 h2 a2 <&4
+
+    if (( w1 != w2 || h1 != h2 ));
+    then
+        echo "matrix_conv: matrices have different size" >&2
+    fi
+
+    local size=$((w1 * h1))
+
+    local sum
+    typeset -F sum
+
+    local i
+    for ((i = 1; i <= size; i++));
+    do
+        sum=$((sum + a1[i] * a2[i]))
+    done
+
+    echo $sum
+}
+
 #  Usage
 #
 # multiplication of matrix A (fd: 3) and B (fd: 4)
