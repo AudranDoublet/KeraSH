@@ -64,6 +64,12 @@ function fit_sample()
 
         if (( i == nb_layer - 1 ));
         then
+            if matrix_similar $error_margin 3< "$(predict_name $i activation)" 4< "${label_file}";
+            then
+                matrix_create_direct 1 1 1.0 > $(tmp_name 1)
+                matrix_add_inplace $(predict_name 0 accuracy) $(tmp_name 1) $(predict_name 0 accuracy)
+            fi
+
             fit_"$layer_type" "$activation" "$i" 1
         else
             fit_"$layer_type" "$activation" "$i" 0
@@ -83,6 +89,9 @@ function fit_batch_part()
     batch_size=$2
 
     shift 2
+
+    matrix_create_direct 1 1 0.0 > $(predict_name 0 accuracy)
+
     local v
     for v in "$@";
     do
@@ -149,6 +158,9 @@ function fit_batch()
         matrix_add_inplace "$(predict_name 0 cost)" \
                 "${MAT}/$pid/${last}_cost.dat" "$(predict_name 0 cost)"
 
+        matrix_add_inplace "$(predict_name 0 accuracy)" \
+                "${MAT}/$pid/0_accuracy.dat" "$(predict_name 0 accuracy)"
+
         rm -rf "${MAT}/$pid/"
     done
 
@@ -166,7 +178,12 @@ function fit_batch()
     done
 
     matrix_mul_scalar $(( 1.0 / batch_size )) < "$(predict_name 0 cost)" > "$(tmp_name 0)"
-    printf "Epoch: %4i Batch: %4i cost: %f\n" ${epoch_counter} ${batch_counter} $(tail -n +2 "$(tmp_name 0)")
+    cost=$(matrix_mean < "$(tmp_name 0)")
+
+    accuracy=$(matrix_mean < $(predict_name 0 accuracy))
+    accuracy=$((100 * accuracy / batch_size))
+
+    printf "Epoch: %4i Batch: %4i cost: %f accuracy: %.1f%%\n" ${epoch_counter} ${batch_counter} "${cost}" "${accuracy}"
     rm -f ${MAT}/$$/*.dat
 }
 
@@ -200,6 +217,7 @@ function fit()
     export batch_size=$3
     export nb_proc=$4
     export learning_rate=$5
+    export error_margin=$6
     export genome_dir="${MODEL}/genomes/gen_$gen_id"
 
     # Get model's layer count
