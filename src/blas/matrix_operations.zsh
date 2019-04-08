@@ -140,7 +140,7 @@ function matrix_mean()
 
     size=$((w1 * h1))
 
-    local i
+    local i=0
     for ((i = 1; i <= size; i++));
     do
         sum=$((sum + a1[i]))
