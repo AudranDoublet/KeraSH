@@ -67,6 +67,8 @@ function tensor_apply_convolution()
     local count_x=$3
     local count_y=$4
 
+    local f=$5
+
     local d=0
     local x=0
     local y=0
@@ -89,7 +91,7 @@ function tensor_apply_convolution()
             for (( x = 0; x < count_x; x++ ));
             do
                 tensor_splice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 2)
-                matrix_conv 3< $(tmp_name 1) 4< $(tmp_name 2)
+                $f 3< $(tmp_name 1) 4< $(tmp_name 2)
             done
         done
     done
@@ -108,7 +110,6 @@ function tensor_apply()
     do
         $1 ${a1[i]}
     done
-
 }
 
 #   Usage
