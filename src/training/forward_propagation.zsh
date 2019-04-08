@@ -33,12 +33,6 @@ function predict_convolution()
 
     read w1 h1 d1 < "${input_file}"
 
-    if (( pad == 0 ));
-    then
-        w1=$((w1 - w1 % kernel_w))
-        h1=$((h1 - h1 % kernel_h))
-    fi
-
     w1=$(( (w1 - kernel_w + 2 * pad) / stride + 1 ))
     h1=$(( (h1 - kernel_h + 2 * pad) / stride + 1 ))
     d1=$(( d1 * filter_count ))
@@ -48,10 +42,43 @@ function predict_convolution()
 
         for ((i = 0; i < filter_count; i++));
         do
-            tensor_apply_convolution $stride $pad $w1 $h1\
+            tensor_apply_convolution $stride $pad $w1 $h1 matrix_conv \
                     3< "${input_file}" 4< "${dir}/filter_$i.dat"
         done
-    } > "$(predict_name $laerid activity)"
+    } > "$(predict_name $layerid activity)"
+
+    input_file="$(predict_name $layerid activation)"
+    tensor_apply activ_$activation < "$(predict_name $layerid activity)" \
+                                   > "${input_file}"
+}
+
+function predict_max_pooling()
+{
+    local dir="$1"
+    local activation="$2"
+    local layerid="$3"
+    local stride="$4"
+    local pad="$5"
+    local kernel_w="$6"
+    local kernel_h="$7"
+
+    local i
+
+    read w1 h1 d1 < "${input_file}"
+
+    w1=$(( (w1 - kernel_w + 2 * pad) / stride + 1 ))
+    h1=$(( (h1 - kernel_h + 2 * pad) / stride + 1 ))
+    d1=$(( d1 ))
+
+    {
+        echo $w1 $h1 $d1
+
+        for ((i = 0; i < filter_count; i++));
+        do
+            tensor_apply_convolution $stride $pad $w1 $h1 matrix_conv \
+                    3< "${input_file}" 4< "${dir}/filter_$i.dat"
+        done
+    } > "$(predict_name $layerid activity)"
 
     input_file="$(predict_name $layerid activation)"
     tensor_apply activ_$activation < "$(predict_name $layerid activity)" \

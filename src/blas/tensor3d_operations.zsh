@@ -97,6 +97,47 @@ function tensor_apply_convolution()
     done
 }
 
+function tensor_apply_convreduce()
+{
+    local stride=$1
+    local pad=$2
+    local count_x=$3
+    local count_y=$4
+
+    local f=$5
+
+    local d=0
+    local x=0
+    local y=0
+
+    read w1 h1 d1 <&3
+    read w2 h2 d2 <&4
+
+    if (( d1 != d2 ));
+    then
+        echo "tensor_apply_convreduce: different depth"
+        return 1
+    fi
+
+    for (( d = 0; d < d1; d++ ));
+    do
+        for (( y = 0; y < count_y; y++ ));
+        do
+            for (( x = 0; x < count_x; x++ ));
+            do
+                tensor_splice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 1)
+                $f < $(tmp_name 1)
+            done
+        done
+    done
+}
+
+#   Usage
+#
+# Reduce tensor (stdin) with function <f>
+# Print result on stdout
+#
+# tensor_reduce <f>
 function tensor_reduce()
 {
     f=$1
