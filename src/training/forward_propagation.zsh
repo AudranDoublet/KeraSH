@@ -73,11 +73,8 @@ function predict_max_pooling()
     {
         echo $w1 $h1 $d1
 
-        for ((i = 0; i < filter_count; i++));
-        do
-            tensor_apply_convolution $stride $pad $w1 $h1 matrix_conv \
-                    3< "${input_file}" 4< "${dir}/filter_$i.dat"
-        done
+        tensor_apply_convreduce $stride $pad $w1 $h1 $kernel_w \
+                "tensor_reduce g_max" 3< "${input_file}"
     } > "$(predict_name $layerid activity)"
 
     input_file="$(predict_name $layerid activation)"
