@@ -1,5 +1,10 @@
 #!/bin/zsh
 
+#   Usage
+#
+# load tensor from STDIN
+#
+# tensor_load <width (def: width)> <height (def: height)> <depth (def: depth)>
 function tensor_load()
 {
     local val=( "${(f)mapfile[/proc/self/fd/0]}" )
