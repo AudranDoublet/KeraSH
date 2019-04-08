@@ -126,6 +126,57 @@ function matrix_mul_scalar()
     done
 }
 
+#   Usage
+#
+# print STDIN matrix mean on STDOUT
+# matrix_mean <scalar>
+function matrix_mean()
+{
+    matrix_load w1 h1 a1
+
+    local sum
+    typeset -F sum
+    sum=0.0
+
+    size=$((w1 * h1))
+
+    local i
+    for ((i = 1; i <= size; i++));
+    do
+        sum=$((sum + a1[i]))
+    done
+
+    echo $((sum / size))
+}
+
+#   Usage
+# check if matrices A and B are similar, meaning that the difference between
+# Ai,j and Bi,j is smaller than lambda
+#
+# matrix_similar <lambda> 3< A 4< B
+function matrix_similar()
+{
+    matrix_load w1 h1 a1 <&3
+    matrix_load w2 h2 a2 <&4
+
+    if (( w1 != w2 || h1 != h2 ));
+    then
+        echo "matrix_similar: matrices have different size" >&2
+        return 1
+    fi
+
+    local i
+    for ((i = 1; i <= size; i++));
+    do
+        if (( abs(a1[i] - a2[i]) > $1 ));
+        then
+            return 1
+        fi
+    done
+
+    return 0
+}
+
 #  Usage
 #
 # point-to-point multiplication of matrix A (fd: 3) and B (fd: 4)
