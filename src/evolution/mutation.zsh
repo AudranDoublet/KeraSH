@@ -13,7 +13,7 @@ function add_layer()
 
     local layer_meta="${activation} dense"
 
-    local genome_path="${MODEL}/${genome_id}/"
+    local genome_path="${MODEL}/genomes/gen_${genome_id}/"
     local old_layer_nb=$(tac "${genome_path}/meta.dat" | head -n 1)
     local new_layer_id=$((int(rint(old_layer_nb - 2))))
 
@@ -45,7 +45,7 @@ function resize_layer()
 {
     local genome_id=$1
     local layer_id=$2
-    local mutation_delta=$3
+    local mutation_delta=$(( (20 - 4) * rand48() + 4 ))
 
     local layer_to_mutate="${MODEL}/genomes/gen_${genome_id}/topology/layer_${layer_id}/"
 
@@ -64,6 +64,7 @@ function change_activation()
     local genome_id=$1
     local layer_id=$2
 
+    local genome_path="${MODEL}/genomes/gen_${genome_id}/"
     local new_activation=ACTIVATION_FUNCS[$((int(rint( (${#ACTIVATION_FUNCS[@]} - 1) * rand48() + 1)) ))]
     local layer_meta="${activation} dense"
     echo "${layer_meta}" > "${genome_path}/topology/layer_${layer_id}/meta.dat"
