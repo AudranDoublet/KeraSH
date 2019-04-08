@@ -2,7 +2,7 @@
 
 #   Usage
 #
-# splice a tensor3d (stdin) in a tensor2d (stdout)
+# slice a tensor3d (stdin) in a tensor2d (stdout)
 # Parameters:
 #   depth
 #   start_x
@@ -11,7 +11,7 @@
 #   height
 #   stride
 #   pad
-function tensor_splice()
+function tensor_slice()
 {
     local s_x=$1
     local s_y=$2
@@ -31,7 +31,7 @@ function tensor_splice()
     local x
     local y
 
-    echo "$4" "$5" 1
+    echo "$4" "$5" "$6"
 
     for ((z = s_z; z < e_z; z++));
     do
@@ -43,7 +43,7 @@ function tensor_splice()
                 then
                     echo 0.0
                 else
-                    echo ${a[x + y*w + d*w*h + 1]}
+                    echo ${a[x + y*w + z*w*h + 1]}
                 fi
             done
         done
@@ -84,13 +84,13 @@ function tensor_apply_convolution()
 
     for (( d = 0; d < d1; d++ ));
     do
-        tensor_splice 0 0 $d $w2 $h2 1 1 0 > $(tmp_name 1)
+        tensor_slice 0 0 $d $w2 $h2 1 1 0 > $(tmp_name 1)
 
         for (( y = 0; y < count_y; y++ ));
         do
             for (( x = 0; x < count_x; x++ ));
             do
-                tensor_splice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 2)
+                tensor_slice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 2)
                 $f 3< $(tmp_name 1) 4< $(tmp_name 2)
             done
         done
@@ -125,7 +125,7 @@ function tensor_apply_convreduce()
         do
             for (( x = 0; x < count_x; x++ ));
             do
-                tensor_splice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 1)
+                tensor_slice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 1)
                 $f < $(tmp_name 1)
             done
         done
