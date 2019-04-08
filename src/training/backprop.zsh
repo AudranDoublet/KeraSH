@@ -96,6 +96,7 @@ function fit_batch_part()
 function fit_batch()
 {
     local i
+    local j
     for ((i = 0; i < nb_layer; i++));
     do
         local p="${MODEL}/genomes/gen_$gen_id/topology/layer_$i"
@@ -117,7 +118,6 @@ function fit_batch()
 
         vec=()
 
-        local j
         for (( j = beg; j < en; j++ ));
         do
             vec[$((j - beg + 1))]=$1
@@ -148,15 +148,17 @@ function fit_batch()
 
         matrix_add_inplace "$(predict_name 0 cost)" \
                 "${MAT}/$pid/${last}_cost.dat" "$(predict_name 0 cost)"
+
+        rm -rf "${MAT}/$pid/"
     done
 
     # Apply learning rate/gradient on each layer
     for (( i = 1; i < nb_layer; i++ ));
     do
-        matrix_mul_scalar $((- 1.0 * learning_rate / batch_size)) \
+        matrix_mul_scalar $(( 1.0 * learning_rate / batch_size)) \
                 < "$(predict_name $i gradients)" > "$(tmp_name 0)"
 
-        matrix_mul_scalar $((- 1.0 * learning_rate / batch_size)) \
+        matrix_mul_scalar $(( 1.0 * learning_rate / batch_size)) \
                 < "$(predict_name $i bias_gradients)" > "$(tmp_name 2)"
 
         matrix_add_inplace "$genome_dir/topology/layer_$i/weights.dat" "$(tmp_name 0)" "$genome_dir/topology/layer_$i/weights.dat"
@@ -165,7 +167,7 @@ function fit_batch()
 
     matrix_mul_scalar $(( 1.0 / batch_size )) < "$(predict_name 0 cost)" > "$(tmp_name 0)"
     echo Epoch: ${epoch_counter} Batch: ${batch_counter} cost: $(tail -n +2 "$(tmp_name 0)")
-    rm -f "$(predict_name 0 cost)"
+    rm -f ${MAT}/$$/*.dat
 }
 
 function fit_epoch()

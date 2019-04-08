@@ -37,7 +37,7 @@ function matrix_load()
     elif (($# == 3))
     then
         read "$1" "$2" <<< ${val[1]}
-        eval "$3=(${val:3})"
+        eval "$3=(${val:4})"
     else
         return 1
     fi
