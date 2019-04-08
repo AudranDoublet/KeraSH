@@ -95,6 +95,26 @@ function tensor_apply_convolution()
     done
 }
 
+function tensor_apply()
+{
+    tensor_load w1 h1 d1 a1
+
+    size=$((w1 * h1 * d1))
+    echo $w1 $h1 $d1
+
+    local i
+
+    for ((i = 1; i <= size; i++));
+    do
+        $1 ${a1[i]}
+    done
+
+}
+
+#   Usage
+#
+# Flatten STDIN tensor
+# Write in STDOUT
 function tensor_flatten()
 {
     tensor_load
