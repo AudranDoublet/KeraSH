@@ -41,8 +41,8 @@ function matrix_add_inplace()
     if (( w1 != w2 || h1 != h2 ));
     then
         echo "matrix_add_inplace: matrices have different size" >&2
-        echo "$w1 x $h1 and $w2 x $h2"
-        echo "${1} and ${2}"
+        echo "$w1 x $h1 and $w2 x $h2" >&2
+        echo "${1} and ${2}" >&2
         return 1
     fi
 
