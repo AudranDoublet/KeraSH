@@ -70,6 +70,7 @@ function matrix_random()
 
     size=$(($1*$2))
 
+    local i
     for ((i = 0; i < size; i++));
     do
         echo $(( rand48() ))
@@ -98,6 +99,7 @@ function matrix_create_fill()
 
     size=$(($1*$2))
 
+    local i
     for ((i = 0; i < size; i++));
     do
         echo "$val"
@@ -121,6 +123,7 @@ function matrix_create_direct()
 
     shift 2
 
+    local i
     for ((i = 0; i < size; i++))
     do
         if (($# > 0));
