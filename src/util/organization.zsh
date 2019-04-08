@@ -43,7 +43,7 @@ function ensure_layers_compatibility()
     local curr_layer_mutation_delta=$3
 
     local layer_to_update_id=$((curr_layer_id + 1))
-    local layer_to_update="${MODEL}/gen_${genome_id}/topology/layer_${layer_to_update_id}/"
+    local layer_to_update="${MODEL}/curr_generation/gen_${genome_id}/topology/layer_${layer_to_update_id}/"
 
     matrix_load w h < "${layer_to_update}/weights.dat"
     local new_height=$(( h + curr_layer_mutation_delta ))
