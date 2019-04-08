@@ -21,3 +21,19 @@ function tensor_load()
         return 1
     fi
 }
+
+#   Usage
+#
+# write a new tensor in STDOUT
+#
+# tensor_create <width> <height> <depth>
+function tensor_create()
+{
+    if (($# != 3));
+    then
+        echo "tensor_create: bad usage" >&2
+        return 1
+    fi
+
+    echo "$1" "$2" "$3"
+}
