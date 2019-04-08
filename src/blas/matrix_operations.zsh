@@ -260,6 +260,7 @@ function matrix_conv()
     if (( w1 != w2 || h1 != h2 ));
     then
         echo "matrix_conv: matrices have different size" >&2
+        return 1
     fi
 
     local size=$((w1 * h1))
