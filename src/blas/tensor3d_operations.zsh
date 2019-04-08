@@ -94,3 +94,9 @@ function tensor_apply_convolution()
         done
     done
 }
+
+function tensor_flatten()
+{
+    tensor_load
+    tensor_create_direct $((width * height * depth)) 1 1 $array
+}
