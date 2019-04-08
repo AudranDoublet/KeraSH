@@ -179,6 +179,7 @@ function fit_batch()
 
     matrix_mul_scalar $(( 1.0 / batch_size )) < "$(predict_name 0 cost)" > "$(tmp_name 0)"
     cost=$(matrix_mean < "$(tmp_name 0)")
+    echo "${cost}" > "${genome_dir}"
 
     accuracy=$(matrix_mean < $(predict_name 0 accuracy))
     accuracy=$((100 * accuracy / batch_size))
