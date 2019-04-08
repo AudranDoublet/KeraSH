@@ -30,6 +30,7 @@ function tensor_slice()
 
     local x
     local y
+    local z
 
     echo "$4" "$5" "$6"
 
@@ -69,28 +70,26 @@ function tensor_apply_convolution()
 
     local f=$5
 
-    local d=0
-    local x=0
-    local y=0
+    local d=0 x=0 y=0
 
-    read w1 h1 d1 <&3
-    read w2 h2 d2 <&4
+    read _w1 _h1 _d1 <&3
+    read _w2 _h2 _d2 <&4
 
-    if (( d1 != d2 ));
+    if (( _d1 != _d2 ));
     then
-        echo "tensor_apply_convolution: different depth"
+        echo "tensor_apply_convolution: different depth" >&2
         return 1
     fi
 
-    for (( d = 0; d < d1; d++ ));
+    for (( z = 0; z < _d1; z++ ));
     do
-        tensor_slice 0 0 $d $w2 $h2 1 1 0 > $(tmp_name 1)
+        tensor_slice 0 0 $z $_w2 $_h2 1 1 0 <&4 > $(tmp_name 1)
 
         for (( y = 0; y < count_y; y++ ));
         do
             for (( x = 0; x < count_x; x++ ));
             do
-                tensor_slice $((x * stride)) $((y * stride)) $d $w2 $h2 1 $pad > $(tmp_name 2)
+                tensor_slice $((x * stride)) $((y * stride)) $z $_w2 $_h2 1 $pad <&3 > $(tmp_name 2)
                 $f 3< $(tmp_name 1) 4< $(tmp_name 2)
             done
         done
