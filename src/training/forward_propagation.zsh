@@ -77,9 +77,7 @@ function predict_max_pooling()
                 "tensor_reduce g_max" 3< "${input_file}"
     } > "$(predict_name $layerid activity)"
 
-    input_file="$(predict_name $layerid activation)"
-    tensor_apply activ_$activation < "$(predict_name $layerid activity)" \
-                                   > "${input_file}"
+    input_file="$(predict_name $layerid activity)"
 }
 
 function predict_flatten()

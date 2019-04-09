@@ -76,6 +76,23 @@ function parse_output()
     height="$width"
 }
 
+function parse_convolution()
+{
+    layer_activation="$1"
+    params="$2 $3 $4 $5 $6"
+}
+
+function parse_max_pooling()
+{
+    layer_activation="$1"
+    params="$2 $3 $4 $5"
+}
+
+function parse_flatten()
+{
+    layer_activation="$1"
+}
+
 function parse_model()
 {
     local model_file=$1
