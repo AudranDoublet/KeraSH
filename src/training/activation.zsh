@@ -3,6 +3,7 @@
 typeset -U ACTIVATION_FUNCS
 
 ACTIVATION_FUNCS=(identity binarystep sigmoid tanh arctan arcsinh elliotsig isru isrlu relu prelu elu selu srelu softplus bentidentity sinusoid sinc gaussian softmax)
+ACTIVATION_FUNCS=(identity binarystep sigmoid tanh arctan arcsinh elliotsig isrlu relu softplus bentidentity sinusoid sinc gaussian)
 
 function activation_exists()
 {
@@ -231,7 +232,7 @@ function activ_d_sinusoid()
     echo $(( cos($1) ))
 }
 
-function activ_d_sinc()
+function activ_sinc()
 {
     echo $(( $1 == 0 ? 0. : sin($1) / $1 ))
 }

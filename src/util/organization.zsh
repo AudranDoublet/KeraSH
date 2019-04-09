@@ -33,7 +33,6 @@ function create_genome()
     local genome_dir="${MODEL}/genomes/gen_${genome_name}"
     mkdir -p "${genome_dir}/topology"
     parse_model "${model_file}" "${genome_dir}"
-    echo "${genome_dir}"
 }
 
 function ensure_layers_compatibility()
@@ -43,10 +42,16 @@ function ensure_layers_compatibility()
     local curr_layer_mutation_delta=$3
 
     local layer_to_update_id=$((curr_layer_id + 1))
-    local layer_to_update="${MODEL}/gen_${genome_id}/topology/layer_${layer_to_update_id}/"
 
-    matrix_load w h < "${layer_to_update}/weights.dat"
-    local new_height=$(( h + curr_layer_mutation_delta ))
-    matrix_resize $w $new_height "${layer_to_update}/weights.dat"
-    matrix_resize $new_height $w "${layer_to_update}/weights_t.dat"
+    if [ -e "${MODEL}/genomes/gen_${genome_id}/topology/layer_$layer_to_update_id" ];
+    then
+        local layer_to_update="${MODEL}/genomes/gen_${genome_id}/topology/layer_${layer_to_update_id}/"
+        local prev_layer="${MODEL}/genomes/gen_${genome_id}/topology/layer_$((layer_to_update_id - 1))/"
+
+        matrix_load w h d < "${layer_to_update}/weights.dat"
+        matrix_load w2 h2 d2 < "${prev_layer}/weights.dat"
+
+        matrix_resize $w $w2 "${layer_to_update}/weights.dat"
+        matrix_resize $w 1 "${layer_to_update}/bias_weights.dat"
+    fi
 }

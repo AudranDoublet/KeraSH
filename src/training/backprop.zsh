@@ -58,6 +58,7 @@ function fit_sample()
     label_file=$2
 
     typeset -i i
+    local i
     for ((i = nb_layer - 1; i >= 0; i--));
     do
         read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
@@ -118,7 +119,7 @@ function fit_batch()
     do
         beg=$((i * batch_size / nb_proc))
         en=$(((i + 1.0) * batch_size / nb_proc))
-        en=$((int(rint(en))))
+        en=$((int(int(en))))
 
         if (( beg == en ));
         then 
@@ -179,7 +180,8 @@ function fit_batch()
 
     matrix_mul_scalar $(( 1.0 / batch_size )) < "$(predict_name 0 cost)" > "$(tmp_name 0)"
     cost=$(matrix_mean < "$(tmp_name 0)")
-    echo "${cost}" > "${genome_dir}"
+
+    echo "${cost}" > "${genome_dir}/result"
 
     accuracy=$(matrix_mean < $(predict_name 0 accuracy))
     accuracy=$((100 * accuracy / batch_size))
@@ -205,6 +207,7 @@ function fit_epoch()
         fi
 
         local start=$((nb - batch_size))
+
         fit_batch ${features:$start:$nb}
         batch_counter=$(( batch_counter + 1))
     done
@@ -227,7 +230,7 @@ function fit()
 
     local epoch_counter=0
     local i
-    for (( i = 0; i < epoch_count; i++ ));
+    for (( i = 0; i < 1; i++ ));
     do
         fit_epoch
         epoch_counter=$((epoch_counter + 1))
