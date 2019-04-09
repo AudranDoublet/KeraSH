@@ -165,6 +165,7 @@ function matrix_resize()
     {
         echo $w1 $h1 1
 
+        local i
         for ((i = 1; i <= newsize; i++));
         do
             if ((i <= oldsize));

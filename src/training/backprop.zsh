@@ -58,7 +58,6 @@ function fit_sample()
     label_file=$2
 
     typeset -i i
-    local i
     for ((i = nb_layer - 1; i >= 0; i--));
     do
         read activation layer_type < "$genome_dir/topology/layer_$i/meta.dat"
@@ -230,7 +229,7 @@ function fit()
 
     local epoch_counter=0
     local i
-    for (( i = 0; i < 1; i++ ));
+    for (( i = 0; i < $epoch_count; i++ ));
     do
         fit_epoch
         epoch_counter=$((epoch_counter + 1))
